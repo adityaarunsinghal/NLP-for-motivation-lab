@@ -9,9 +9,10 @@ import numpy as np
 from nltk.corpus import stopwords
 import imblearn
 import random
+from joblib import dump, load
 
 class predictor:
-    def __init__(self, df, Xcolname, kind='l2', solver='lbfgs', k_neighbors = 4):
+    def __init__(self, df, Xcolname, kind='l2', solver='lbfgs', k_neighbors = 4, min_df = 2):
         self.random_state = random.randint(0, 42)
         self.stop_words = stopwords.words("english")
         df['num_stop'], df['total_words'] = list(zip(*df[Xcolname].apply(self.count_stop))) # is adding total words a good idea? Need more dim reduction and proper feature engineering from code book AND a proper system to test performance
@@ -20,7 +21,7 @@ class predictor:
         self.solver=solver
         self.Xcolname = Xcolname
         self.balancer = imblearn.over_sampling.SMOTE(k_neighbors = k_neighbors, random_state=self.random_state) #need to make this more flexible to extremely underrepresented classes using randomoversampler
-        self.vectorizer = TfidfVectorizer(ngram_range=(1,2), min_df=2, stop_words={'english'})
+        self.vectorizer = TfidfVectorizer(ngram_range=(1,2), min_df=min_df, stop_words={'english'})
         X = self.vectorizer.fit_transform(df[Xcolname])
         self.X = hstack((X,np.array(df['num_stop'], df['total_words'])[:,None]))
 
@@ -64,3 +65,13 @@ class predictor:
         # x = hstack((x,np.array([count, length])[:,None]))
         x = hstack((x,np.array([[count, length]])[:,None]))
         return(self.model.predict_proba(x) + "\n The predicted value is = " + self.model.predict(x))
+
+    def save_model(self, modelname, path="/Users/aditya/Documents/GitHub/NLP-for-motivation-lab/models/"):
+        self.path = path
+        dump(self.model, f'{self.path}{modelname}_lr.joblib')
+        dump(self.vectorizer, f'{self.path}{modelname}_v.joblib')
+
+    def load_model(self, modelname, path="/Users/aditya/Documents/GitHub/NLP-for-motivation-lab/models/"):
+        self.path = path
+        self.model = load(f'/Users/aditya/Documents/GitHub/NLP-for-motivation-lab/models/{modelname}_lr.joblib')
+        self.vectorizer = load(f'/Users/aditya/Documents/GitHub/NLP-for-motivation-lab/models/{modelname}_v.joblib')

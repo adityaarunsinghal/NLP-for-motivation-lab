@@ -70,8 +70,3 @@ class predictor:
         self.path = path
         dump(self.model, f'{self.path}{modelname}_lr.joblib')
         dump(self.vectorizer, f'{self.path}{modelname}_v.joblib')
-
-    def load_model(self, modelname, path="/Users/aditya/Documents/GitHub/NLP-for-motivation-lab/models/"):
-        self.path = path
-        self.model = load(f'/Users/aditya/Documents/GitHub/NLP-for-motivation-lab/models/{modelname}_lr.joblib')
-        self.vectorizer = load(f'/Users/aditya/Documents/GitHub/NLP-for-motivation-lab/models/{modelname}_v.joblib')

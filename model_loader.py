@@ -1,5 +1,5 @@
 
-from scipy.sparse import coo_matrix, hstack
+from scipy.sparse import coo_matrix, hstack, csr_matrix
 from sklearn.linear_model import LogisticRegression
 from sklearn import metrics
 from sklearn.model_selection import cross_validate
@@ -28,7 +28,10 @@ class model_loader:
     def predict_values(self, x):
         df = pd.DataFrame(x)
         df['num_stop'], df['total_words'] = list(zip(*x.apply(self.count_stop)))
-        X = self.vectorizer.transform(x)
-        self.X = hstack((X,np.array(df['num_stop'], df['total_words'])[:,None]))
-        print(X.shape)
-        return(self.model.predict(X))
+        self.X = self.vectorizer.transform(x)
+        print(self.X.shape)
+        self.X = hstack([self.X, csr_matrix(np.array(df['num_stop'])).T])
+        self.X = hstack([self.X, csr_matrix(np.array(df['total_words'])).T])
+        print(self.X.shape)
+        return(self.model.predict(self.X))
+        # return(self.X)   

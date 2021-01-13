@@ -4,18 +4,25 @@ from sklearn import metrics
 from sklearn.model_selection import cross_validate
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.preprocessing import MinMaxScaler
 from nltk import word_tokenize
 import numpy as np
 from nltk.corpus import stopwords
 import imblearn
 import random
 from joblib import dump, load
+import os
 
 class predictor:
     def __init__(self, df, Xcolname, kind='l2', solver='lbfgs', k_neighbors = 4, min_df = 2):
         self.random_state = random.randint(0, 42)
         self.stop_words = stopwords.words("english")
         df['num_stop'], df['total_words'] = list(zip(*df[Xcolname].apply(self.count_stop))) # is adding total words a good idea? Need more dim reduction and proper feature engineering from code book AND a proper system to test performance
+        self.num_added_features = 2
+        for i in range(1,self.num_added_features+1):
+            exec(f"self.norm_extra{i} = MinMaxScaler()")
+        df['num_stop'] = self.norm_extra1.fit_transform(np.array(df['num_stop']).reshape(-1,1))
+        df['total_words'] = self.norm_extra2.fit_transform(np.array(df['total_words']).reshape(-1,1))
         self.df = df
         self.kind=kind
         self.solver=solver
@@ -61,13 +68,18 @@ class predictor:
         return(score)
     
     def predict(self, x):
-        count, length = self.count_stop(x)
+        count, length = self.count_stop(x) #not normalized
         x = self.vectorizer.transform([x])
         # x = hstack((x,np.array([count, length])[:,None]))
         x = hstack((x,np.array([[count, length]])[:,None]))
         return(self.model.predict_proba(x) + "\n The predicted value is = " + self.model.predict(x))
 
     def save_model(self, modelname, path="/Users/aditya/Documents/GitHub/NLP-for-motivation-lab/models/"):
-        self.path = path
+        folder = path+modelname+"/"
+        if (not os.path.isdir(folder)):
+            os.mkdir(folder)
+        self.path = folder
         dump(self.model, f'{self.path}{modelname}_lr.joblib')
         dump(self.vectorizer, f'{self.path}{modelname}_v.joblib')
+        for i in range(1,self.num_added_features+1):
+            exec(f"dump(self.norm_extra{i},'{self.path}{modelname}_norm{i}.joblib')")

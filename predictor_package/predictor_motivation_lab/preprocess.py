@@ -23,6 +23,12 @@ def pp_set(entries, scores, coder):
     return(dct)
 
 def pp_entries(entries_series):
+    
+    """
+    input = Pandas Series of all Utterances
+    output = Transcribed Dataframe readable by trainer/predictor
+    """
+
     dcts = entries_series.apply(lambda x: pp_entry(x))
     return(pd.DataFrame(list(dcts)).fillna(0))
 

@@ -1,16 +1,16 @@
-from scipy.sparse import coo_matrix, hstack, csr_matrix
-from sklearn.linear_model import LogisticRegression
-from sklearn import metrics
-from sklearn.model_selection import cross_validate
-from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
+from scipy.sparse import coo_matrix, hstack, csr_matrix
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import cross_validate
 from sklearn.preprocessing import MinMaxScaler
-from nltk import word_tokenize
-import numpy as np
 from nltk.corpus import stopwords
+from nltk import word_tokenize
+from joblib import dump, load
+from sklearn import metrics
+import numpy as np
 import imblearn
 import random
-from joblib import dump, load
 import os
 
 class predictor:

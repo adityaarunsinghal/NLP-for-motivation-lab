@@ -29,7 +29,7 @@ class predictor:
         self.Xcolname = Xcolname
         self.balancer = imblearn.over_sampling.SMOTE(k_neighbors = k_neighbors, random_state=self.random_state) #need to make this more flexible to extremely underrepresented classes using randomoversampler
         self.vectorizer = TfidfVectorizer(ngram_range=(1,2), min_df=min_df, stop_words={'english'})
-        self.X = self.vectorizer.fit_transform(df[Xcolname])
+        self.X = self.vectorizer.fit_transform(df[Xcolname]) #don't save training data in object
         self.X = hstack([self.X, csr_matrix(np.array(df['num_stop'])).T])
         self.X = hstack([self.X, csr_matrix(np.array(df['total_words'])).T])
 
